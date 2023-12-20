@@ -9,6 +9,7 @@ import classeswarpicktool.utils.FileUtils;
 import classeswarpicktool.utils.LogUtils;
 import classeswarpicktool.utils.Utils;
 import classeswarpicktool.zip.ZipUtils;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
@@ -16,6 +17,10 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -34,8 +39,9 @@ import li.flor.nativejfilechooser.NativeJFileChooser;
  */
 public class DeploymentGUI extends javax.swing.JFrame {
 
-    private static final String COPYRIGHT = "Version 3.0.7 @ducseul";
-    private static final String BUILT_DATE = "Build date: 12/11/2023";
+    private static final String COPYRIGHT = "Version 3.0.8 @ducseul";
+    private static final String BUILT_DATE = "Build date: 20/12/2023";
+    private static final String GITHUB_URL = "https://github.com/ducseul/ClassesWarPickTool";
 
     /**
      * Creates new form Main
@@ -76,6 +82,7 @@ public class DeploymentGUI extends javax.swing.JFrame {
         cbIsZip = new javax.swing.JCheckBox();
         txtCopyright = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("WAR Classes Pick Tool");
@@ -134,6 +141,15 @@ public class DeploymentGUI extends javax.swing.JFrame {
             }
         });
 
+        jLabel4.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(153, 153, 255));
+        jLabel4.setText("@Github");
+        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel4MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -160,7 +176,10 @@ public class DeploymentGUI extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtCopyright, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtCopyright, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -189,7 +208,9 @@ public class DeploymentGUI extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtStatus)
                         .addGap(2, 2, 2)
-                        .addComponent(txtCopyright)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtCopyright)
+                            .addComponent(jLabel4))))
                 .addContainerGap())
         );
 
@@ -220,12 +241,12 @@ public class DeploymentGUI extends javax.swing.JFrame {
                     return;
                 }
                 File outputFile = new File(txtOutput.getText().trim());
-                if (!outputFile.canWrite()) {
-                    LogUtils.setStatus("Oops! The build folder appear can't write to");
-                    return;
-                }
 
                 if (FileUtils.folderContainsFilesOrSubfolders(outputFile.getAbsolutePath())) {
+                    if (!outputFile.canWrite()) {
+                        LogUtils.setStatus("Oops! The build folder appear can't write to");
+                        return;
+                    }
                     JFrame frame = new JFrame();
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -251,6 +272,9 @@ public class DeploymentGUI extends javax.swing.JFrame {
                     }
                     if (fileChange.contains("/src/main/webapp/")) {
                         fileChange = "/" + fileChange.split("/src/main/webapp/")[1];
+                    }
+                    if (fileChange.contains("/src/main/resources/")) {
+                        fileChange = "/" + fileChange.split("/src/main/resources/")[1];
                     }
                     if (fileChange.toLowerCase().contains(".sql")) {
                         JOptionPane.showMessageDialog(null, "Phát hiện thay đổi SQL, hãy thực hiện tạo thay đổi Database bằng tay", "Lưu ý", JOptionPane.WARNING_MESSAGE);
@@ -313,6 +337,15 @@ public class DeploymentGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtOutputActionPerformed
 
+    private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
+        try {
+            // TODO add your handling code here:
+            openWebpage(new URL(GITHUB_URL));
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(DeploymentGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jLabel4MouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -356,6 +389,7 @@ public class DeploymentGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel txtCopyright;
     private javax.swing.JTextArea txtFileChange;
@@ -372,5 +406,27 @@ public class DeploymentGUI extends javax.swing.JFrame {
             throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
         }
         return destFile;
+    }
+
+    public static boolean openWebpage(URI uri) {
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                desktop.browse(uri);
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public static boolean openWebpage(URL url) {
+        try {
+            return openWebpage(url.toURI());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
