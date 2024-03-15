@@ -37,8 +37,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class DeploymentGUI extends javax.swing.JFrame {
 
-    private static final String COPYRIGHT = "Version 3.0.8 @ducseul";
-    private static final String BUILT_DATE = "Build date: 20/12/2023";
+    private static final String COPYRIGHT = "Version 3.1.1 @ducseul";
+    private static final String BUILT_DATE = "Build date: 15/03/2024";
     private static final String GITHUB_URL = "https://github.com/ducseul/ClassesWarPickTool";
 
     /**
@@ -166,18 +166,18 @@ public class DeploymentGUI extends javax.swing.JFrame {
                                 .addComponent(warFilePath)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton2))
-                            .addComponent(txtOutput, javax.swing.GroupLayout.DEFAULT_SIZE, 673, Short.MAX_VALUE)))
+                            .addComponent(txtOutput)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(cbIsZip))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtCopyright, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addComponent(txtCopyright, javax.swing.GroupLayout.PREFERRED_SIZE, 582, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -314,12 +314,12 @@ public class DeploymentGUI extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
 
-        NativeJFileChooser fileDialog = new NativeJFileChooser();
+        JFileChooser fileDialog = new JFileChooser();
         String currDirectory = FileUtils.readFromPropertiesFile(Constants.CONFIG_KEY.DEFAULT_DIRECTORY);
         if (currDirectory != null && !currDirectory.isEmpty()) {
-            fileDialog = new NativeJFileChooser(new File(currDirectory));
+            fileDialog = new JFileChooser(new File(currDirectory));
         }
-        fileDialog.setFileFilter(new FileNameExtensionFilter("WAR", "*.war", "ZIP", "*.zip"));
+        fileDialog.setFileFilter(new FileNameExtensionFilter("WAR or ZIP file", "WAR","war", "ZIP", "zip"));
         int returnVal = fileDialog.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             java.io.File file = fileDialog.getSelectedFile();
