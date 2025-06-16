@@ -43,7 +43,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class DeploymentGUI extends javax.swing.JFrame {
 
-    private static final String COPYRIGHT = "Version 4.1.13 @ducseul";
+    private static final String COPYRIGHT = "Version 4.1.14 @ducseul";
     private static final String BUILT_DATE = "Build date: 16/06/2025";
     private static final String GITHUB_URL = "https://github.com/ducseul/ClassesWarPickTool";
 
@@ -374,7 +374,7 @@ public class DeploymentGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         File folder = new File(tbBuildFolder.getText());
         if (!folder.exists() || !folder.isDirectory()) {
-            JOptionPane.showMessageDialog(this, "Invalid folder path.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Folder not exists yet.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
