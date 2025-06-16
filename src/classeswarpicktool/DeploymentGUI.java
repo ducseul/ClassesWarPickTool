@@ -13,8 +13,12 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -29,6 +33,8 @@ import java.util.zip.ZipEntry;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -37,8 +43,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class DeploymentGUI extends javax.swing.JFrame {
 
-    private static final String COPYRIGHT = "Version 3.1.1 @ducseul";
-    private static final String BUILT_DATE = "Build date: 15/03/2024";
+    private static final String COPYRIGHT = "Version 4.1.13 @ducseul";
+    private static final String BUILT_DATE = "Build date: 16/06/2025";
     private static final String GITHUB_URL = "https://github.com/ducseul/ClassesWarPickTool";
 
     /**
@@ -71,16 +77,17 @@ public class DeploymentGUI extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         warFilePath = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        txtOutput = new javax.swing.JTextField();
+        tbBuildFolder = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtFileChange = new javax.swing.JTextArea();
-        jButton1 = new javax.swing.JButton();
+        btnStart = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
         cbIsZip = new javax.swing.JCheckBox();
         txtCopyright = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
-        jLabel4 = new javax.swing.JLabel();
+        btnSelectWar = new javax.swing.JButton();
+        lbGithub = new javax.swing.JLabel();
+        btnOpen = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("WAR Classes Pick Tool");
@@ -93,15 +100,10 @@ public class DeploymentGUI extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel2.setText("Build Folder");
 
-        txtOutput.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        txtOutput.addMouseListener(new java.awt.event.MouseAdapter() {
+        tbBuildFolder.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        tbBuildFolder.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                txtOutputMouseClicked(evt);
-            }
-        });
-        txtOutput.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtOutputActionPerformed(evt);
+                tbBuildFolderMouseClicked(evt);
             }
         });
 
@@ -110,13 +112,18 @@ public class DeploymentGUI extends javax.swing.JFrame {
 
         txtFileChange.setColumns(20);
         txtFileChange.setRows(5);
+        txtFileChange.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                txtFileChangeMousePressed(evt);
+            }
+        });
         jScrollPane1.setViewportView(txtFileChange);
 
-        jButton1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton1.setText("Start");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnStart.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnStart.setText("Start");
+        btnStart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnStartActionPerformed(evt);
             }
         });
 
@@ -132,19 +139,26 @@ public class DeploymentGUI extends javax.swing.JFrame {
         txtCopyright.setForeground(new java.awt.Color(153, 153, 153));
         txtCopyright.setText("Copyright");
 
-        jButton2.setText("Browser");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnSelectWar.setText("Browser");
+        btnSelectWar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnSelectWarActionPerformed(evt);
             }
         });
 
-        jLabel4.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(153, 153, 255));
-        jLabel4.setText("@Github");
-        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
+        lbGithub.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
+        lbGithub.setForeground(new java.awt.Color(153, 153, 255));
+        lbGithub.setText("@Github");
+        lbGithub.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel4MouseClicked(evt);
+                lbGithubMouseClicked(evt);
+            }
+        });
+
+        btnOpen.setText("Open");
+        btnOpen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOpenActionPerformed(evt);
             }
         });
 
@@ -162,11 +176,12 @@ public class DeploymentGUI extends javax.swing.JFrame {
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(warFilePath)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton2))
-                            .addComponent(txtOutput)))
+                            .addComponent(warFilePath)
+                            .addComponent(tbBuildFolder))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnOpen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnSelectWar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -175,11 +190,11 @@ public class DeploymentGUI extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lbGithub, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(txtCopyright, javax.swing.GroupLayout.PREFERRED_SIZE, 582, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnStart, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -189,46 +204,57 @@ public class DeploymentGUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(warFilePath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2))
+                    .addComponent(btnSelectWar))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(txtOutput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(tbBuildFolder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnOpen))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel3)
                     .addComponent(cbIsZip))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 397, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton1)
+                    .addComponent(btnStart)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtStatus)
                         .addGap(2, 2, 2)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtCopyright)
-                            .addComponent(jLabel4))))
+                            .addComponent(lbGithub))))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtOutputMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtOutputMouseClicked
+    private void tbBuildFolderMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbBuildFolderMouseClicked
         // TODO add your handling code here:
-        if (evt.getClickCount() == 2 && evt.getButton() == 1) {
-            String tmp = (new File(this.warFilePath.getText())).getParentFile().getAbsolutePath() + File.separator;
-            if (!(new File(tmp + "ROOT")).exists()) {
-                tmp = tmp + "ROOT";
-            } else {
-                tmp = tmp + "build_" + Utils.getTimestamp();
-            }
-            this.txtOutput.setText(tmp);
-        }
-    }//GEN-LAST:event_txtOutputMouseClicked
+        if (evt.getButton() == 2 || evt.getButton() == 3) {
+            File warFile = new File(this.warFilePath.getText());
+            File parent = warFile.getParentFile();
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+            if (parent != null) {
+                String tmp = parent.getAbsolutePath() + File.separator;
+                File rootDir = new File(tmp + "ROOT");
+
+                if (!rootDir.exists()) {
+                    tmp = tmp + "ROOT";
+                } else {
+                    tmp = tmp + "build_" + Utils.getTimestamp();
+                }
+
+                this.tbBuildFolder.setText(tmp);
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid path: Cannot determine parent directory.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_tbBuildFolderMouseClicked
+
+    private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         Thread runner;
         runner = new Thread(new Runnable() {
             public void run() {
@@ -238,10 +264,14 @@ public class DeploymentGUI extends javax.swing.JFrame {
                     LogUtils.setStatus("Oops! WAR file can't read or don't exist yet.");
                     return;
                 }
-                File outputFile = new File(txtOutput.getText().trim());
-
-                if (FileUtils.folderContainsFilesOrSubfolders(outputFile.getAbsolutePath())) {
-                    if (!outputFile.canWrite()) {
+                File outputFolder = new File(tbBuildFolder.getText().trim());
+                if (!outputFolder.exists()) {
+                    if (!outputFolder.mkdir()) {
+                        LogUtils.setStatus("Oops! Can't create building folder at %s.".formatted(outputFolder.getAbsolutePath()));
+                    }
+                }
+                if (FileUtils.folderContainsFilesOrSubfolders(outputFolder.getAbsolutePath())) {
+                    if (!outputFolder.canWrite()) {
                         LogUtils.setStatus("Oops! The build folder appear can't write to");
                         return;
                     }
@@ -284,6 +314,7 @@ public class DeploymentGUI extends javax.swing.JFrame {
                         JOptionPane.showMessageDialog(null, "Phát hiện thay đổi file cấu hình properties " + fileChange + ", lưu ý khi áp dụng thay đổi", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
                     }
                     lstChangeFile.add(fileChange.replace("/", "\\").trim());
+                    lstChangeFile.add(fileChange.trim());
                 }
                 try {
                     Thread.sleep(2000);
@@ -291,12 +322,12 @@ public class DeploymentGUI extends javax.swing.JFrame {
                     Logger.getLogger(DeploymentGUI.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 try {
-                    ZipUtils.doUnzip(lstChangeFile, warFilePath.getText().trim(), txtOutput.getText().trim());
+                    ZipUtils.doUnzip(lstChangeFile, warFilePath.getText().trim(), tbBuildFolder.getText().trim());
                     if (cbIsZip.isSelected()) {
                         Thread.sleep(500);
                         LogUtils.setStatus("Create zip file");
-                        String outputZip = txtOutput.getText().trim().endsWith(".zip") ? txtOutput.getText().trim() : txtOutput.getText().trim() + ".zip";
-                        ZipUtils.zipFolder(txtOutput.getText().trim(), outputZip);
+                        String outputZip = tbBuildFolder.getText().trim().endsWith(".zip") ? tbBuildFolder.getText().trim() : tbBuildFolder.getText().trim() + ".zip";
+                        ZipUtils.zipFolder(tbBuildFolder.getText().trim(), outputZip);
                         LogUtils.setStatus("Create built ZIP file success!");
                     }
                 } catch (IOException ex) {
@@ -309,17 +340,16 @@ public class DeploymentGUI extends javax.swing.JFrame {
             }
         });
         runner.start();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnStartActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnSelectWarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectWarActionPerformed
         // TODO add your handling code here:
-
         JFileChooser fileDialog = new JFileChooser();
         String currDirectory = FileUtils.readFromPropertiesFile(Constants.CONFIG_KEY.DEFAULT_DIRECTORY);
         if (currDirectory != null && !currDirectory.isEmpty()) {
             fileDialog = new JFileChooser(new File(currDirectory));
         }
-        fileDialog.setFileFilter(new FileNameExtensionFilter("WAR or ZIP file", "WAR","war", "ZIP", "zip"));
+        fileDialog.setFileFilter(new FileNameExtensionFilter("WAR or ZIP file", "WAR", "war", "ZIP", "zip"));
         int returnVal = fileDialog.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             java.io.File file = fileDialog.getSelectedFile();
@@ -329,20 +359,66 @@ public class DeploymentGUI extends javax.swing.JFrame {
         } else {
             this.requestFocus();
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnSelectWarActionPerformed
 
-    private void txtOutputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOutputActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtOutputActionPerformed
-
-    private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
+    private void lbGithubMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbGithubMouseClicked
         try {
             // TODO add your handling code here:
             openWebpage(new URL(GITHUB_URL));
         } catch (MalformedURLException ex) {
             Logger.getLogger(DeploymentGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_jLabel4MouseClicked
+    }//GEN-LAST:event_lbGithubMouseClicked
+
+    private void btnOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOpenActionPerformed
+        // TODO add your handling code here:
+        File folder = new File(tbBuildFolder.getText());
+        if (!folder.exists() || !folder.isDirectory()) {
+            JOptionPane.showMessageDialog(this, "Invalid folder path.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("win")) {
+                Runtime.getRuntime().exec(new String[]{"explorer.exe", folder.getAbsolutePath()});
+            } else if (os.contains("mac")) {
+                Runtime.getRuntime().exec(new String[]{"open", folder.getAbsolutePath()});
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
+                // Try common Linux file managers
+                if (isCommandAvailable("xdg-open")) {
+                    Runtime.getRuntime().exec(new String[]{"xdg-open", folder.getAbsolutePath()});
+                } else if (isCommandAvailable("nautilus")) {
+                    Runtime.getRuntime().exec(new String[]{"nautilus", folder.getAbsolutePath()});
+                } else {
+                    throw new UnsupportedOperationException("No known file manager found.");
+                }
+            } else {
+                throw new UnsupportedOperationException("Unsupported OS: " + os);
+            }
+        } catch (IOException | UnsupportedOperationException ex) {
+            JOptionPane.showMessageDialog(this, "Error opening folder:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnOpenActionPerformed
+
+    private void txtFileChangeMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtFileChangeMousePressed
+        // TODO add your handling code here:
+        try {
+            boolean isRightClick = SwingUtilities.isRightMouseButton(evt);
+            if (isRightClick) {
+                Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+                String clipBoard = c.getData(DataFlavor.stringFlavor) + "";
+                String name = ((JTextArea) evt.getSource()).getName();
+                if ("txtFileChange".equals(name)) {
+                    txtFileChange.setText(clipBoard);
+                }
+            }
+//            System.out.println("Source: "+((JTextArea)evt.getSource()).getName());
+        } catch (UnsupportedFlavorException | IOException ex) {
+            Logger.getLogger(DeploymentGUI.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_txtFileChangeMousePressed
 
     /**
      * @param args the command line arguments
@@ -381,17 +457,18 @@ public class DeploymentGUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnOpen;
+    private javax.swing.JButton btnSelectWar;
+    private javax.swing.JButton btnStart;
     private javax.swing.JCheckBox cbIsZip;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lbGithub;
+    private javax.swing.JTextField tbBuildFolder;
     private javax.swing.JLabel txtCopyright;
     private javax.swing.JTextArea txtFileChange;
-    private javax.swing.JTextField txtOutput;
     private javax.swing.JLabel txtStatus;
     private javax.swing.JTextField warFilePath;
     // End of variables declaration//GEN-END:variables
@@ -426,5 +503,14 @@ public class DeploymentGUI extends javax.swing.JFrame {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private boolean isCommandAvailable(String command) {
+        try {
+            Process process = Runtime.getRuntime().exec(new String[]{"which", command});
+            return process.waitFor() == 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

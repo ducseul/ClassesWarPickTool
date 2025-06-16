@@ -79,7 +79,7 @@ public class ZipUtils {
         }
         LogUtils.setStatus("Create built folder success!");
     }
-    
+
     public static void zipFolder(String srcFolderPath, String zipFolderPath) throws IOException {
         FileOutputStream fos = new FileOutputStream(zipFolderPath);
         ZipOutputStream zipOut = new ZipOutputStream(fos);
@@ -91,24 +91,33 @@ public class ZipUtils {
     }
 
     private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+        if (fileToZip == null || !fileToZip.exists()) {
+            System.err.println("Skipping: " + fileToZip + " (does not exist)");
+            return;
+        }
+
         if (fileToZip.isHidden()) {
             return;
         }
 
         if (fileToZip.isDirectory()) {
-            if (fileName.endsWith("/")) {
-                zipOut.putNextEntry(new ZipEntry(fileName));
-            } else {
-                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+            if (!fileName.endsWith("/")) {
+                fileName += "/";
             }
+            zipOut.putNextEntry(new ZipEntry(fileName));
             zipOut.closeEntry();
 
             File[] children = fileToZip.listFiles();
             if (children != null) {
                 for (File childFile : children) {
-                    zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+                    zipFile(childFile, fileName + childFile.getName(), zipOut);
                 }
             }
+            return;
+        }
+
+        if (!fileToZip.isFile()) {
+            System.err.println("Skipping non-regular file: " + fileToZip);
             return;
         }
 
@@ -129,8 +138,8 @@ public class ZipUtils {
     private static String getDisplayLogFile(String absoluteFilePaht, String outputPath) {
         String parent = new File(outputPath).getParent();
         String replaceAll = absoluteFilePaht.replace(outputPath, "");
-        if(replaceAll.length() >= 80){
-            replaceAll = "..."+ replaceAll.substring(replaceAll.length() - 80, replaceAll.length());
+        if (replaceAll.length() >= 80) {
+            replaceAll = "..." + replaceAll.substring(replaceAll.length() - 80, replaceAll.length());
         }
         return replaceAll;
     }
