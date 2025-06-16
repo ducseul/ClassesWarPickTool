@@ -43,7 +43,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class DeploymentGUI extends javax.swing.JFrame {
 
-    private static final String COPYRIGHT = "Version 4.1.14 @ducseul";
+    private static final String COPYRIGHT = "Version 4.1.21 @ducseul";
     private static final String BUILT_DATE = "Build date: 16/06/2025";
     private static final String GITHUB_URL = "https://github.com/ducseul/ClassesWarPickTool";
 
@@ -372,24 +372,29 @@ public class DeploymentGUI extends javax.swing.JFrame {
 
     private void btnOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOpenActionPerformed
         // TODO add your handling code here:
-        File folder = new File(tbBuildFolder.getText());
-        if (!folder.exists() || !folder.isDirectory()) {
-            JOptionPane.showMessageDialog(this, "Folder not exists yet.", "Error", JOptionPane.ERROR_MESSAGE);
+        File target = new File(tbBuildFolder.getText());
+        File parent = target.getParentFile();
+
+        if (target == null || parent == null || !parent.exists() || !parent.isDirectory()) {
+            JOptionPane.showMessageDialog(this, "Target or parent folder doesn't exist.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         try {
             String os = System.getProperty("os.name").toLowerCase();
             if (os.contains("win")) {
-                Runtime.getRuntime().exec(new String[]{"explorer.exe", folder.getAbsolutePath()});
+                // Use explorer to select the file/folder
+                Runtime.getRuntime().exec(new String[]{"explorer.exe", "/select,", target.getAbsolutePath()});
             } else if (os.contains("mac")) {
-                Runtime.getRuntime().exec(new String[]{"open", folder.getAbsolutePath()});
+                // macOS can open Finder and select the file
+                Runtime.getRuntime().exec(new String[]{"open", "-R", target.getAbsolutePath()});
             } else if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
-                // Try common Linux file managers
-                if (isCommandAvailable("xdg-open")) {
-                    Runtime.getRuntime().exec(new String[]{"xdg-open", folder.getAbsolutePath()});
-                } else if (isCommandAvailable("nautilus")) {
-                    Runtime.getRuntime().exec(new String[]{"nautilus", folder.getAbsolutePath()});
+                // Linux does not have a universal way to "select" a file
+                if (isCommandAvailable("nautilus")) {
+                    Runtime.getRuntime().exec(new String[]{"nautilus", "--select", target.getAbsolutePath()});
+                } else if (isCommandAvailable("xdg-open")) {
+                    // Fall back to just opening the parent directory
+                    Runtime.getRuntime().exec(new String[]{"xdg-open", parent.getAbsolutePath()});
                 } else {
                     throw new UnsupportedOperationException("No known file manager found.");
                 }
